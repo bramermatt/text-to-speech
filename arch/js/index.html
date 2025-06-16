@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a2e0e6ad63.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans min-h-screen">
+
+  <!-- Top App Bar -->
+  <header class="bg-white shadow sticky top-0 z-50">
+    <div class="flex flex-wrap items-center justify-between px-4 py-3 gap-2">
+
+      <!-- Left: Title and Menus -->
+      <div class="flex flex-wrap items-center gap-4 flex-1 min-w-[200px]">
+        <input id="docName" class="font-semibold text-lg bg-transparent border-none focus:outline-none w-52 truncate" value="Untitled document" />
+        <div class="hidden sm:flex gap-3 text-sm text-gray-700">
+          <button onclick="openFileMenu()" class="hover:text-blue-600">File</button>
+          <button class="hover:text-blue-600">Edit</button>
+          <button class="hover:text-blue-600">View</button>
+          <button onclick="toggleHistory()" class="hover:text-blue-600">History</button>
+        </div>
+      </div>
+
+      <!-- Right: Toolbar -->
+      <div class="flex items-center gap-3 flex-wrap justify-end">
+        <select id="fontSelect" class="p-1 rounded border text-sm">
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+
+        <select id="zoomSelect" class="p-1 rounded border text-sm">
+          <option value="1">100%</option>
+          <option value="1.25">125%</option>
+          <option value="1.5">150%</option>
+        </select>
+
+        <select id="voiceSelect" class="p-1 rounded border text-sm max-w-[10rem] truncate"></select>
+
+        <button id="playToggleBtn" onclick="toggleSpeech()" class="text-blue-600 text-base font-medium hover:text-blue-800 flex items-center gap-1">
+          <i id="playIcon" class="fas fa-play"></i><span class="hidden sm:inline">Play</span>
+        </button>
+
+        <span id="counter" class="text-xs text-gray-600 whitespace-nowrap">0 words | 0 chars</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Document Area -->
+  <main class="flex justify-center p-4 overflow-auto">
+    <div id="pageWrapper" class="bg-white w-[816px] h-[1056px] p-10 shadow-md origin-top transform transition-transform duration-200">
+      <textarea
+        id="textInput"
+        class="w-full h-full text-lg leading-relaxed resize-none focus:outline-none bg-transparent"
+        placeholder="Start writing here..."
+      ></textarea>
+    </div>
+  </main>
+
+  <!-- File Menu Modal -->
+  <div id="fileMenuModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-md w-80 space-y-4">
+      <button onclick="downloadFile()" class="w-full bg-blue-600 text-white py-2 rounded">Download as .txt</button>
+      <button onclick="downloadPDF()" class="w-full bg-gray-700 text-white py-2 rounded">Download as .pdf</button>
+      <button onclick="closeFileMenu()" class="w-full text-red-500">Close</button>
+    </div>
+  </div>
+
+  <!-- History Panel -->
+  <aside id="historyPanel" class="hidden fixed right-0 top-0 h-full w-72 bg-white shadow-lg border-l p-4 overflow-y-auto z-40">
+    <h2 class="font-bold mb-2">Document History</h2>
+    <ul id="historyList" class="space-y-2 text-sm"></ul>
+  </aside>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/textEdit.js"></script>
+
+</body>
+</html>

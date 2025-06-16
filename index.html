@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Text Reader</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a2e0e6ad63.js" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body class="bg-gray-800 text-gray-100 font-sans min-h-screen">
+
+  <!-- Fullscreen Text Area Container -->
+<main class="fixed inset-0 flex flex-col items-center justify-start p-0 m-0 w-full h-full">
+    <div class="w-full h-full max-w-none">
+        <textarea
+            style="padding-bottom: 90px; min-height:100vh; min-width:100vw; "
+            id="textInput"
+            class="w-full h-full p-4 bg-gray-800 text-gray-100 border-none rounded-none resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Type or paste any text, then press the play button to listen. You can pause or stop playback at any time...."
+            style="min-height:100vh; min-width:100vw; "
+        ></textarea>
+    </div>
+</main>
+
+<!-- Thumb Navbar -->
+<nav class="fixed bottom-3 left-1/2 -translate-x-1/2 w-[90%] z-50 bg-gradient-to-t from-gray-900/90 via-gray-900/80 to-transparent backdrop-blur-md shadow-[0_-4px_32px_0_rgba(0,0,0,0.45)] flex justify-between px-3 py-4 rounded-xl"
+    style="box-shadow: 0 -4px 32px 0 rgba(0,0,0,0.45);">
+    <!-- App Logo/Title -->
+    <div class="flex items-center gap-3">
+       <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-700 shadow-lg">
+          <i class="fas fa-volume-up text-white text-lg"></i>
+       </span>
+       <span class="font-bold text-lg text-gray-100 tracking-wide select-none">VTR</span>
+    </div>
+    <!-- Thumb Controls -->
+    <div class="flex items-center gap-3">
+       <!-- Word Count Display -->
+       <div class="flex flex-col items-end gap-1">
+        <span id="wordCharCount" class="text-gray-300 bg-gray-800/80 px-3 py-2 rounded text-xs select-none shadow-[0_2px_12px_2px_rgba(0,0,0,0.25)]">0 | 0</span>
+       </div>
+       <!-- Info Button -->
+       <button id="infoBtn" onclick="openModal()" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all" title="About">
+          <i class="fas fa-info text-lg"></i>
+       </button>
+       <!-- Download TXT Button -->
+       <!-- <button id="downloadTxtBtn" title="Download as .txt" class="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg transition-all">
+          <i class="fas fa-file-alt text-lg"></i>
+       </button> -->
+       <!-- Play/Pause Button -->
+       <button id="playToggleBtn" onclick="toggleSpeech()" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all" title="Play/Pause">
+          <i id="playIcon" class="fas fa-play text-xl"></i>
+       </button>
+    </div>
+</nav>
+<script>
+    // Word/Char Count
+    const wordCharCountEl = document.getElementById('wordCharCount');
+    function updateWordCharCount() {
+        const text = document.getElementById('textInput').value;
+        const trimmed = text.trim();
+        const wordCount = trimmed ? trimmed.split(/\s+/).length : 0;
+        const charCount = text.length;
+        wordCharCountEl.textContent = `${wordCount} | ${charCount}`;
+    }
+    document.getElementById('textInput').addEventListener('input', updateWordCharCount);
+    updateWordCharCount();
+
+    // Download as TXT
+    document.getElementById('downloadTxtBtn').onclick = function() {
+        const text = document.getElementById('textInput').value;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        // Get current date-time string
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
+
+        // Simple AI summary: first 30 chars, trimmed
+        let summary = text.trim().replace(/\s+/g, ' ').slice(0, 30);
+        if (summary.length === 30) summary += '…';
+
+        // Sanitize summary for filename
+        summary = summary.replace(/[^a-z0-9\-_\s]/gi, '').replace(/\s+/g, '_');
+
+        a.download = `${summary}_${dateStr}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+</script>
+
+<!-- Info Modal -->
+<div id="infoModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden transition-all duration-300">
+    <div class="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-2xl p-4 max-w-lg w-[95vw] shadow-2xl relative border border-blue-700/30 animate-fadeIn">
+        <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-blue-400 transition-colors text-xl" aria-label="Close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="flex items-center gap-3 mb-4">
+            <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-700/80 shadow-lg animate-pulse">
+                <i class="fas fa-volume-up text-white text-2xl"></i>
+            </span>
+            <h2 class="text-2xl font-extrabold text-blue-400 tracking-wide drop-shadow">Voice Text Reader</h2>
+        </div>
+        <p class="mb-3 text-gray-200 leading-relaxed">
+            <span class="font-semibold text-blue-300">Convert text to speech instantly!</span> Type or paste any text, then press <span class="inline-flex items-center px-2 py-1 bg-blue-700/30 rounded text-xs font-mono"><i class="fas fa-play mr-1"></i>Play</span> to listen. Pause or stop anytime.
+        </p>
+        <ul class="mb-3 text-gray-300 text-sm space-y-1 pl-5 list-disc">
+            <li>All processing happens <span class="font-semibold text-blue-300">locally</span> in your browser.</li>
+            <li>No data is sent or stored anywhere.</li>
+            <li>Supports most modern browsers (Chrome, Edge, Firefox, Safari).</li>
+        </ul>
+        <div class="flex items-center gap-2 mb-3">
+            <span class="text-xs text-gray-400">Powered by the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API" target="_blank" class="underline hover:text-blue-300">Web Speech API</a></span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-gray-400">
+            <span>Made with <span class="text-pink-400">♥</span> by <a href="https://www.mattbramer.com/" target="_blank" class="underline hover:text-blue-300 font-semibold">Matt Bramer</a>. <span>No data ever leaves your browser.</span>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96);}
+  to { opacity: 1; transform: scale(1);}
+}
+.animate-fadeIn { animation: fadeIn 0.3s ease; }
+</style>
+
+<script>
+    function openModal() {
+        document.getElementById('infoModal').classList.remove('hidden');
+    }
+    function closeModal() {
+        document.getElementById('infoModal').classList.add('hidden');
+    }
+    // Optional: Close modal on background click
+    document.getElementById('infoModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+
+<script>
+    const playBtn = document.getElementById('playToggleBtn');
+    const playIcon = document.getElementById('playIcon');
+    const textInput = document.getElementById('textInput');
+
+    const synth = window.speechSynthesis;
+    let voices = [];
+    let isPlaying = false;
+    let currentUtterance = null;
+    let lastStart = null, lastEnd = null;
+
+    function populateVoices() {
+        voices = synth.getVoices();
+    }
+
+    function toggleSpeech() {
+        if (!isPlaying) {
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            synth.cancel();
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            if (voices.length > 0) {
+                currentUtterance.voice = voices[0];
+            }
+
+            currentUtterance.onboundary = function(event) {
+                if (event.name === 'word') {
+                    highlightWord(event.charIndex, event.charLength || 1);
+                }
+            };
+
+            currentUtterance.onend = () => {
+                isPlaying = false;
+                updateButton();
+                clearHighlight();
+            };
+
+            currentUtterance.onerror = () => {
+                isPlaying = false;
+                updateButton();
+                clearHighlight();
+            };
+
+            synth.speak(currentUtterance);
+            isPlaying = true;
+            updateButton();
+        } else {
+            synth.cancel();
+            isPlaying = false;
+            updateButton();
+            clearHighlight();
+        }
+    }
+
+    function updateButton() {
+        playIcon.className = isPlaying ? 'fas fa-pause text-xl' : 'fas fa-play text-xl';
+    }
+
+    function highlightWord(start, length) {
+        // Save scroll position
+        const scroll = textInput.scrollTop;
+        // Set selection to current word
+        textInput.focus();
+        textInput.setSelectionRange(start, start + length);
+        // Restore scroll position
+        textInput.scrollTop = scroll;
+        lastStart = start;
+        lastEnd = start + length;
+    }
+
+    function clearHighlight() {
+        // Remove selection
+        textInput.setSelectionRange(textInput.value.length, textInput.value.length);
+    }
+
+    populateVoices();
+    if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = populateVoices;
+    }
+</script>
+
+
+
+</body>
+</html>
